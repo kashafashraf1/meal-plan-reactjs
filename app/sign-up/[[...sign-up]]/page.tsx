@@ -1,6 +1,6 @@
 import {SignUp} from '@clerk/nextjs';
 export default function SignUpPage() {
   return (
-    <div><SignUp /></div>
+    <div><SignUp signInFallbackRedirectUrl="/subscribe" /></div>
   );
 }
