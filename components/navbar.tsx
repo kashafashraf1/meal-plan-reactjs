@@ -22,7 +22,7 @@ export default function Navbar() {
           <div className="space-x-6 flex items-center">
             <SignedIn>
               <Link href="/mealplan" className="text-white hover:text-gray-300 transition">Meal Planner</Link>
-              {user? .imageUrl ? (
+              {user?.imageUrl ? (
                 <Link href="/profile">
                   <Image src={user.imageUrl} alt="User icon" width={40} height={40} />
                 </Link>
