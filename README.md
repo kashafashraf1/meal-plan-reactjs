@@ -1,3 +1,11 @@
+# Choose meal plan APP
+User can sign-up for free using clerk authentication.
+User can then add their dietary prepferences to tailor the mealplan.
+User will get their mealplan weekly.
+
+
+
+# Standard Next.js README
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

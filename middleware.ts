@@ -1,13 +1,15 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-/**
- * Checks if the request is for a public route.
- */
+
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-up(.*)",
   "/subscribe(.*)",
+]);
+
+const isSignUpRoute = createRouteMatcher([
+  "/sign-up(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -16,11 +18,24 @@ export default clerkMiddleware(async (auth, req) => {
   const {pathname, origin} = req.nextUrl;
   console.log("Middleware info:", userId, pathname, origin);
 
+  /**
+   * Checks if the request is for a public route.
+   */
   if(!userId && !isPublicRoute(req)) {
     // Redirect to sign-up page if user is not authenticated and trying to access a protected route
     return NextResponse.redirect(new URL('/sign-up', origin));
   }
 
+  /**
+   * Redirect to mealplan if user is signed-in and tries to sign-up.
+   */  
+  if(isSignUpRoute (req) && userId) {
+    // Redirect to home page if user is authenticated and trying to access the sign-up page
+    return NextResponse.redirect(new URL('/mealplan', origin));
+  }
+  
+  // continue with the request if no conditions are met
+  return NextResponse.next();
 });
 
 export const config = {
