@@ -1,6 +1,27 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-export default clerkMiddleware();
+/**
+ * Checks if the request is for a public route.
+ */
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-up(.*)",
+  "/subscribe(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  const userAuth = await auth();
+  const {userId} = userAuth;
+  const {pathname, origin} = req.nextUrl;
+  console.log("Middleware info:", userId, pathname, origin);
+
+  if(!userId && !isPublicRoute(req)) {
+    // Redirect to sign-up page if user is not authenticated and trying to access a protected route
+    return NextResponse.redirect(new URL('/sign-up', origin));
+  }
+
+});
 
 export const config = {
   matcher: [
