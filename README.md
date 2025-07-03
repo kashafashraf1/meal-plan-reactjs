@@ -1,12 +1,15 @@
 # Choose meal plan APP
+https://meal-plan-reactjs.vercel.app/
 User can sign-up for free using clerk authentication.
 User can then add their dietary prepferences to tailor the mealplan.
 User will get their mealplan weekly.
 
 # Tech highlights
-Authentication - Clerk (https://www.clerk.com/)
-Database - Postgres @ neon (https://neon.tech)
-ORM - Prisma 
+Authentication - Clerk (https://www.clerk.com/).
+
+Database - Postgres @ neon (https://neon.tech).
+
+ORM - Prisma.
 
 
 
