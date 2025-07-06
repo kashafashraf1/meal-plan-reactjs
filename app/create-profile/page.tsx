@@ -29,16 +29,11 @@ export default function CreateProfilePage() {
     const router = useRouter();
     const {mutate, isPending} = useMutation<ApiResponse, Error >({   
         mutationFn: createProfile,
-        onSuccess: (data) => {
-            if (data.error) {
-                console.error("Error creating profile:", data.error);
-            } else {
-                console.log("Profile created successfully:", data.message);
-                router.push("/subscribe page"); // Redirect to subscribe page once profile is created
-            }
-        },
+        onSuccess: () => {
+            router.push("/subscribe"); // Redirect to subscribe page once profile is created
+        }, 
         onError: (error) => {
-            console.error("Error creating profile:", error.message);
+            console.log(error);
         },
     });   
     

@@ -19,17 +19,14 @@ export async function POST() {
         }
 
         
-        // Check for eixsing profile    
+        // Check for existing profile    
         const existingProfile = await prisma.profile.findUnique({
             where: {
                 userId: clerkUser.id,
             },
         });
 
-        if (existingProfile) {
-            return NextResponse.json({ error: "Profile already exists" }, { status: 400 });
-        }
-
+        if (!existingProfile) {
         // create new profile
         await prisma.profile.create({
             data: {
@@ -42,7 +39,11 @@ export async function POST() {
             },
         });
 
-        return NextResponse.json({ message: "Profile created successfully" }, { status: 201 });
+        return NextResponse.json({ message: "Profile created successfully" }, { status: 201 });            
+            //return NextResponse.json({ error: "Profile already exists" });
+        }
+
+
     } catch (error) {  
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }   
