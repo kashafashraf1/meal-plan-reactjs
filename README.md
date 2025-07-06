@@ -11,6 +11,10 @@ Database - Postgres @ neon (https://neon.tech).
 
 ORM - Prisma.
 
+React Query - for fetching and caching data from an API and handling state management.
+
+The dominance of React Query over traditional state management tools like useEffect and others is that React Query comes with built-in query caching, which means, once data is fetched, it can be stored in a cache and reused later without making redundant API calls.
+
 
 
 # Standard Next.js README
