@@ -52,3 +52,18 @@ export const availablePlans: Plan[] = [
         ],
     },
 ];
+
+// Map the plan types to Stripe price IDs
+const mapPriceId: Record<string, string> = {
+    weekly: process.env.STRIPE_PRICE_WEEKLY || "",
+    monthly: process.env.STRIPE_PRICE_MONTHLY || "",
+    yearly: process.env.STRIPE_PRICE_YEARLY || "",
+};
+
+export const getPriceIDUsingPlanType = (planType: string): string => {
+    const priceId = mapPriceId[planType];
+    if (!priceId) {
+        throw new Error(`No price ID found for plan type: ${planType}`);
+    }
+    return priceId;
+}

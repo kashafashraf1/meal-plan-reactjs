@@ -1,7 +1,49 @@
 import { availablePlans } from '@/lib/plans';
+import { useUser } from '@clerk/nextjs';
+import { useMutation } from '@tanstack/react-query';
+
+type SubscribeResponse = {
+  url: string;
+}
+
+type SubscribeError = {
+  error: string;
+}
 
 
+async function subscribeToPlan(planType: string, userId: string, email: string) : Promise<SubscribeResponse> {
+  const response = await fetch('/api/checkout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ planType, userId, email }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to subscribe');
+  }
+
+  return response.json() as Promise<SubscribeResponse>;
+
+}
 export default function SubscribePage() {
+  const { user } = useUser();
+  const userId = user?.id || '';
+  const email = user?.emailAddresses[0]?.emailAddress || '';
+
+  const {mutate, isPending} = useMutation <SubscribeResponse, SubscribeError>({
+    mutationFn: async (planType: string) => {
+      if(!userId){
+        throw new Error("User ID or email is missing");
+      }
+    
+      return subscribeToPlan(planType, userId, email);
+    },
+
+  });
+  
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <header className="text-center mb-12">
