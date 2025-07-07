@@ -41,6 +41,8 @@ export async function POST() {
 
         return NextResponse.json({ message: "Profile created successfully" }, { status: 201 });            
             //return NextResponse.json({ error: "Profile already exists" });
+        } else {
+            return NextResponse.json({ message: "Existing user" }, { status: 201 });
         }
 
 
