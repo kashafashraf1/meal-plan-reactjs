@@ -43,5 +43,5 @@ export default function CreateProfilePage() {
         }
     }, [isLoaded, isSignedIn]);
 
-    return "<div>Signing up...</p>";
+    return "<div>Signing up...</div>";
 }

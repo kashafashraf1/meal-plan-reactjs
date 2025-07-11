@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
 
         const allowedPlanTypes = ["weekly", "monthly", "yearly"];
         if (!allowedPlanTypes.includes(planType)) {
+            // console.log("Received data:", { planType, userId, email });
             return NextResponse.json({ error: "Invalid plan type" }, { status: 400 });
         }
 
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
+
 
 }
 

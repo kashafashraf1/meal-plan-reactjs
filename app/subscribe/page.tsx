@@ -1,6 +1,11 @@
+"use client";
+
 import { availablePlans } from '@/lib/plans';
 import { useUser } from '@clerk/nextjs';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+
+
 
 type SubscribeResponse = {
   url: string;
@@ -11,13 +16,23 @@ type SubscribeError = {
 }
 
 
-async function subscribeToPlan(planType: string, userId: string, email: string) : Promise<SubscribeResponse> {
-  const response = await fetch('/api/checkout', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ planType, userId, email }),
+const subscribeToPlan = async ({
+  planType,
+  userId,
+  email,
+}: {
+  planType: string;
+  userId: string;
+  email: string;
+}): Promise<SubscribeResponse> => {
+  const response = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      planType,
+      userId,
+      email,
+    }),
   });
 
   if (!response.ok) {
@@ -25,25 +40,54 @@ async function subscribeToPlan(planType: string, userId: string, email: string) 
     throw new Error(errorData.error || 'Failed to subscribe');
   }
 
-  return response.json() as Promise<SubscribeResponse>;
+  const data: SubscribeResponse = await response.json();
+  console.log("Subscription response data:", data);
+  return data
 
 }
 export default function SubscribePage() {
   const { user } = useUser();
+  const router = useRouter();
   const userId = user?.id || '';
   const email = user?.emailAddresses[0]?.emailAddress || '';
 
-  const {mutate, isPending} = useMutation <SubscribeResponse, SubscribeError>({
-    mutationFn: async (planType: string) => {
+  const {mutate, isPending} = useMutation < 
+    SubscribeResponse, 
+    SubscribeError, 
+    { planType: string }
+    >({
+    mutationFn: async ({planType}) => {
+      console.log("Mutating with planType:", planType);
       if(!userId){
-        throw new Error("User ID or email is missing");
+        throw new Error("User ID not signed");
       }
     
-      return subscribeToPlan(planType, userId, email);
+      console.log("Subscribing to plan:", planType, "for user:", userId, "with email:", email);
+      return subscribeToPlan({planType, userId, email});
     },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url; // Redirect to Stripe checkout
+      } else {
+        console.error("No URL returned from subscription API");
+      }
+    },
+    onError: (error) => {
+      console.error("Subscription error:", error);
+    }
 
   });
   
+  function handlePlanSelection(planType: string) {
+    console.log("Selected plan type:", planType);
+    if(!userId) {
+      router.push('/sign-up'); // Redirect to profile creation if user is not signed in
+      return
+    }
+    console.log("2 Selected plan type:", planType);
+    mutate({ planType });
+  }
+
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <header className="text-center mb-12">
@@ -91,8 +135,11 @@ export default function SubscribePage() {
               plan.isPopular 
                 ? "bg-blue-500 hover:bg-blue-600 text-white" 
                 : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-            }`}>
-              Select Plan
+            }`}
+            onClick={() => handlePlanSelection(plan.interval)}
+            disabled={isPending}
+            >
+              {isPending ? 'Processing...' : `Select ${plan.name}`}
             </button>
           </div>
         ))}
