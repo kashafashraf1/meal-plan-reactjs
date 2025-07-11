@@ -4,6 +4,7 @@ import { availablePlans } from '@/lib/plans';
 import { useUser } from '@clerk/nextjs';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import {toast, Toaster} from 'react-hot-toast';
 
 
 
@@ -27,7 +28,7 @@ const subscribeToPlan = async ({
 }): Promise<SubscribeResponse> => {
   const response = await fetch("/api/checkout", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },    
     body: JSON.stringify({
       planType,
       userId,
@@ -65,7 +66,11 @@ export default function SubscribePage() {
       console.log("Subscribing to plan:", planType, "for user:", userId, "with email:", email);
       return subscribeToPlan({planType, userId, email});
     },
+    onMutate: () => {     
+      toast.loading('Processing subscription...');  
+    },
     onSuccess: (data) => {
+      toast.success('Subscription successful! Redirecting to payment...');
       if (data.url) {
         window.location.href = data.url; // Redirect to Stripe checkout
       } else {
@@ -74,6 +79,7 @@ export default function SubscribePage() {
     },
     onError: (error) => {
       console.error("Subscription error:", error);
+      toast.error('Failed to subscribe. Please try again.');
     }
 
   });
