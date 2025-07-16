@@ -4,7 +4,7 @@ import { availablePlans } from '@/lib/plans';
 import { useUser } from '@clerk/nextjs';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import {toast, Toaster} from 'react-hot-toast';
+import toast, {Toaster} from 'react-hot-toast';
 
 
 
