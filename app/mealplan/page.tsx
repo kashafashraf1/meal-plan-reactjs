@@ -81,6 +81,20 @@ import { useMutation } from "@tanstack/react-query";
       console.log("Meal Plan Data:", data);
     }
 
+    const daysOfWeek = [
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    ];
+
+    const getMealPlanForDay = (day: string): dailyMealPlan | undefined => {
+      if (data?.mealPlan && data.mealPlan[day]) {
+        return data.mealPlan[day];
+      }
+      return { Breakfast: "No meal plan available",
+        Lunch: "No meal plan available",
+        Dinner: "No meal plan available",
+        Snacks: "No meal plan available"
+      };
+    };
  return (
     <div className="max-w-6xl mx-auto p-4">
       <header className="text-center mb-12">
@@ -183,26 +197,79 @@ import { useMutation } from "@tanstack/react-query";
 
         {/* Right Column - Results */}
         <div className="w-full lg:w-1/2">
-          <div className="bg-white rounded-xl shadow-md p-6 h-full">
+          <div className="bg-white rounded-xl shadow-md p-6 h-full flex flex-col">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Meal Plan Results</h2>
             
-            <div className="flex flex-col items-center justify-center h-64 text-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
-              <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Meal Plan Results Will Appear Here</h3>
-              <p className="text-gray-600">
-                {data?.mealPlan && isSuccess ? (
-                  <div></div>
-                ) : isPending ? (
+            <div className="flex-grow">
+              {isPending ? (
+                <div className="flex flex-col items-center justify-center h-64">
                   <Spinner />
-                ) : (
-                  <p>Please generate your meal plan</p>
-                )
-                 }
-               
-              </p>
+                  <p className="mt-4 text-gray-600">Generating your meal plan...</p>
+                </div>
+              ) : data?.mealPlan ? (
+                <div className="overflow-y-auto max-h-[500px] pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {daysOfWeek.map((day) => {
+                    const dailyPlan = getMealPlanForDay(day);
+                    return (
+                      <div key={day} className="mb-6 pb-4 border-b border-gray-200 last:border-b-0">
+                        <h3 className="text-lg font-semibold text-blue-600 mb-3">{day}</h3>
+                        <div className="space-y-3">
+                          {dailyPlan.Breakfast && (
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <h4 className="font-medium text-gray-800">Breakfast</h4>
+                              <p className="text-gray-700 mt-1">{dailyPlan.Breakfast}</p>
+                            </div>
+                          )}
+                          
+                          {dailyPlan.Lunch && (
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <h4 className="font-medium text-gray-800">Lunch</h4>
+                              <p className="text-gray-700 mt-1">{dailyPlan.Lunch}</p>
+                            </div>
+                          )}
+                          
+                          {dailyPlan.Dinner && (
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <h4 className="font-medium text-gray-800">Dinner</h4>
+                              <p className="text-gray-700 mt-1">{dailyPlan.Dinner}</p>
+                            </div>
+                          )}
+                          
+                          {dailyPlan.Snacks && (
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <h4 className="font-medium text-gray-800">Snacks</h4>
+                              <p className="text-gray-700 mt-1">{dailyPlan.Snacks}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : data?.error ? (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+                  <p className="text-red-700">
+                    Error: {data.error}
+                  </p>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="mt-3 text-sm text-red-600 underline"
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-64 text-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                  <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">Meal Plan Results Will Appear Here</h3>
+                  <p className="text-gray-600">
+                    Submit the form to generate your personalized AI-powered nutrition plan
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
   ) }
