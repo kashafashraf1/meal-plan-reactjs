@@ -1,10 +1,11 @@
 "use client";
 
+import { Spinner } from "@/components/spinner";
 import { useMutation } from "@tanstack/react-query";
 
-  interface MealPlanFormDataInput  {
+  interface MealPlanInput  {
     dietType: string;
-    caloriesCount: number;
+    calories: number;
     allergies: string;
     cuisine: string;
     snacks: string;
@@ -27,7 +28,7 @@ import { useMutation } from "@tanstack/react-query";
     [day: string]: dailyMealPlan;
   };
 
-  async function fetchMealPlan(formDataInput: MealPlanFormDataInput) {
+  async function fetchMealPlan(formDataInput: MealPlanInput) {
     const response = await fetch('/api/generate-mealplan', {
       method: 'POST',
       headers: {
@@ -45,7 +46,7 @@ import { useMutation } from "@tanstack/react-query";
 
   export default function MealPlanPage() {
   
-    const {mutate, isPending, data} = useMutation<MealPlanResponse, Error, MealPlanFormDataInput>({
+    const {mutate, isPending, data, isSuccess} = useMutation<MealPlanResponse, Error, MealPlanFormDataInput>({
       mutationFn: fetchMealPlan,
       onSuccess: (data) => {
         if (data.error) {
@@ -64,16 +65,16 @@ import { useMutation } from "@tanstack/react-query";
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
       const formData = new FormData(event.currentTarget);
-      const formDataInput: MealPlanFormDataInput = {
+      const payload: MealPlanInput = {
         dietType: formData.get('dietType')?.toString() || '',
-        caloriesCount: Number(formData.get('caloriesCount')) || 2000,
+        calories: Number(formData.get('calories')) || 2000,
         allergies: formData.get('allergies')?.toString() || '',
         cuisine: formData.get('cuisine')?.toString() || '',
-        snacks: formData.get('snacks')?.toString() || '',
+        snacks: formData.get('snacks')?.toString() || "",
         days: 7, // Default to 7 days
       }
-      console.log("Meal Plan Form Data:", formDataInput);
-      mutate(formDataInput);
+      console.log("Meal Plan Form Data:", payload);
+      mutate(payload);
     }
 
     if(data) {
@@ -110,13 +111,13 @@ import { useMutation } from "@tanstack/react-query";
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="caloriesCount" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="calories" className="block text-sm font-medium text-gray-700 mb-1">
                   Daily Calories
                 </label>
                 <input
                   type="number"
-                  id="caloriesCount"
-                  name="caloriesCount"
+                  id="calories"
+                  name="calories"
                   min="800"
                   max="5000"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -189,7 +190,15 @@ import { useMutation } from "@tanstack/react-query";
               <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">Meal Plan Results Will Appear Here</h3>
               <p className="text-gray-600">
-                Submit the form to generate your personalized AI-powered nutrition plan
+                {data?.mealPlan && isSuccess ? (
+                  <div></div>
+                ) : isPending ? (
+                  <Spinner />
+                ) : (
+                  <p>Please generate your meal plan</p>
+                )
+                 }
+               
               </p>
             </div>
           </div>

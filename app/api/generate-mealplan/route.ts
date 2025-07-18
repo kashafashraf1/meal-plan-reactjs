@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 
 const openAI = new OpenAI({
     apiKey: process.env.OPEN_ROUTER_KEY,
-    baseURL: 'https://openrouter.ai/v1',
+    baseURL: 'https://openrouter.ai/api/v1',
 });
 
 export async function POST (request: NextRequest) {
@@ -53,22 +53,26 @@ export async function POST (request: NextRequest) {
          const response = await openAI.chat.completions.create({
               model: 'meta-llama/llama-3.3-70b-instruct:free',
               messages: [{ role: 'user', content: prompt }],
-              max_tokens: 1500, // 
+              max_tokens: 1500,
               temperature: 0.7,
+              response_format: { type: "json_object" } // ADD THIS LINE
          });
     
          const aiResponse = response.choices[0].message.content!.trim();
-         console.log(aiResponse);
-         
          let parsedMealPlan: {[day: string]: dailyMealPlan};
          try {
              parsedMealPlan = JSON.parse(aiResponse);
-             // Return the parsed meal plan
-             return NextResponse.json({ mealPlan: parsedMealPlan });             
          } catch (parseError) {
              console.error("Error parsing JSON:", parseError);
              return NextResponse.json({ error: "Invalid response format from OpenAI" }, { status: 500 });
          }
+         
+         if(!parsedMealPlan || typeof parsedMealPlan !== 'object') {
+             return NextResponse.json({ error: "Invalid meal plan format" }, { status: 500 });
+         }
+         
+         // RETURN THE RESPONSE TO CLIENT
+         return NextResponse.json({ mealPlan: parsedMealPlan });
          
    }
    catch (error:any) {
