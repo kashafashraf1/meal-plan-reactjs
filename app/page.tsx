@@ -13,7 +13,7 @@ export default function Home() {
         <p className="text-lg sm:text-xl text-gray-600 mb-8">
           You just need to tell us what you like, and we will generate a meal plan for you.
         </p>
-        <Link href="/get-started" className="inline-block bg-blue-600 text-white text-lg font-medium px-6 py-3 rounded-full shadow hover:bg-blue-700 transition">
+        <Link href="/sign-up" className="inline-block bg-blue-600 text-white text-lg font-medium px-6 py-3 rounded-full shadow hover:bg-blue-700 transition">
             Get Started
         </Link>
       </section>

@@ -3,10 +3,12 @@
 import { Spinner } from "@/components/spinner";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
-import { Toaster } from "react-hot-toast";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import toast, { Toaster } from "react-hot-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { availablePlans } from "@/lib/plans";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 // Fetch Subscription Status
 async function fetchSubscriptionStatus() {
@@ -32,10 +34,25 @@ async function updatePlan(newPlan: string) {
   return response.json();
 }
 
+// Udpate Plan Mutation
+async function unsubscribePlan() {
+  const response = await fetch("/api/profile/unsubscribe", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to cancel subscription plan");
+  }
+  return response.json();
+}
+
 export default function ProfilePage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
-  
+  const queryClient = useQueryClient();
+  const router = useRouter();
   // Get Subscription Status
   const { 
     data: subscriptionDetail, 
@@ -57,6 +74,32 @@ export default function ProfilePage() {
     } = 
       useMutation({
         mutationFn: updatePlan,
+        onSuccess: () => { // Invalidate the subscription status query to refresh data
+          queryClient.invalidateQueries({queryKey: ["subscriptionStatus"]});
+          toast.success("Subscription plan updated successfully!");
+          refetch(); // Refetch subscription status after update
+        }, 
+        onError: (error: Error) => {
+          toast.error(`Failed to update plan: ${error.message}`);
+        },         
+    });
+
+  // Cancel user subscription plan using Mutation
+  const { 
+    data: cancelPlan,
+    mutate: unsubscribePlanMutation,
+    isPending: isUnsubscribePlanPending,
+    } = 
+      useMutation({
+        mutationFn: unsubscribePlan,
+        onSuccess: () => { // Invalidate the subscription status query to refresh data
+          queryClient.invalidateQueries({queryKey: ["subscriptionStatus"]});
+          router.push("/subscribe");
+        },
+        onError: (error: Error) => {
+          toast.error(`Failed to cancel subscription: ${error.message}`);
+        },
+        retry: false, // Disable automatic retries for this mutation
     });
 
     // Get current Plan
@@ -65,7 +108,7 @@ export default function ProfilePage() {
   );
 
   // on btn click update plan
-  const handleUpdatePlan = () => {
+  function handleUpdatePlan () {
     if (!selectedPlan) {
       return;
     }
@@ -73,6 +116,15 @@ export default function ProfilePage() {
     updatePlanMutation(selectedPlan);
     setSelectedPlan(null);
   };
+  
+  // on btn click unsubscribe plan
+  function handleUnsubscribePlan () {
+    if (confirm("Are you sure you want to unsubscribe? This will cancel your current subscription.")) {
+      unsubscribePlanMutation();
+    }
+  };
+
+   
 
   if (!isLoaded) {
     return (
@@ -252,6 +304,19 @@ export default function ProfilePage() {
                       {isUpdatePlanPending ? 'Updating...' : 'Save Changes'}
                     </button>
                     
+                    {/* Unsubscribe */}
+                    <button 
+                      onClick={handleUnsubscribePlan}
+                      disabled={isUnsubscribePlanPending }
+                      className={`
+                        w-full py-3 px-4 bg-red-600 text-white font-medium rounded-lg transition
+                        hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                        disabled:opacity-70 disabled:cursor-not-allowed
+                      `}
+                    >
+                      {isUnsubscribePlanPending ? 'Unsubscribing...' : 'Unsubscribe'}
+                    </button>
+                    
                     {isUpdatePlanPending && (
                       <div className="mt-3 flex items-center justify-center text-blue-600">
                         <Spinner size="sm" />
@@ -259,6 +324,7 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
+                  
                 )}
               </div>
             </div>
