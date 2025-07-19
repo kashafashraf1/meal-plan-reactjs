@@ -17,14 +17,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const {newPlan} = await request.json();
-        if (!newPlan) {
-            return NextResponse.json(
-                { error: "New plan not specified" },
-                { status: 400 }
-            );
-        }
-
         const profile = await prisma.profile.findUnique({
             where: { userId: clerkUser.id },
         });
@@ -47,14 +39,25 @@ export async function POST(request: NextRequest) {
 
         // Now update user's subscription plan
         const canceledSubscription = await stripe.subscriptions.update(
-            subscriptionId, {
-            items: [
+            subscriptionId, 
                 {
                     cancel_at_period_end: true, // This will cancel the subscription at the end of the current period
-                
                 },
-            ],
-        });   
+        );  
+
+
+        // Get the current subscription item from Stripe
+        // const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        // const subscriptionItemId = subscription.items.data[0]?.id;
+        // if (!subscriptionItemId) {
+        //     return NextResponse.json(
+        //         { error: "No Active subscription found." },
+        //         { status: 404 }
+        //     );
+        // }
+
+
+ 
         
         await prisma.profile.update({
             where: { userId: clerkUser.id },
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
         console.error("Error:", error.message);
         return NextResponse.json(
-            { error: error.message || "Failed to cancel subscription plan" },
+            { error: error.message || "Failed to cancel subscription plan 2" },
             { status: 500 }
         );
 

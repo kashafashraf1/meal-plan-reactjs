@@ -42,8 +42,11 @@ async function unsubscribePlan() {
       "Content-Type": "application/json",
     },
   });
+  console.log(response);
+
+
   if (!response.ok) {
-    throw new Error("Failed to cancel subscription plan");
+    throw new Error("Failed to cancel subscription plan 3");
   }
   return response.json();
 }
@@ -86,14 +89,14 @@ export default function ProfilePage() {
 
   // Cancel user subscription plan using Mutation
   const { 
-    data: cancelPlan,
+    data: canceledPlan,
     mutate: unsubscribePlanMutation,
     isPending: isUnsubscribePlanPending,
     } = 
       useMutation({
         mutationFn: unsubscribePlan,
-        onSuccess: () => { // Invalidate the subscription status query to refresh data
-          queryClient.invalidateQueries({queryKey: ["subscriptionStatus"]});
+        onSuccess: () => { 
+          queryClient.invalidateQueries({queryKey: ["subscriptionStatus"]}); // Invalidate the subscription status query to refresh data
           router.push("/subscribe");
         },
         onError: (error: Error) => {

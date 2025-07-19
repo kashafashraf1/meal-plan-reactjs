@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhook(.*)",
   "/api/subscription-status-middleware(.*)",
   "/api/generate-mealplan(.*)",
+  "/api/profile/unsubscribe(.*)",
 ]);
 
 const isSignUpRoute = createRouteMatcher([
